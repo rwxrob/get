@@ -1,16 +1,10 @@
 # Simple Go package for fetching string data from common sources
 
-Just get a string from any of the common places people keep them.
+Get data from any common place a person might keep it based on the user's preference.
 
 ```go
 get.String(source string) (string, error)
-get.File(source, path string) (*os.File, error)
-get.Config(source, relpath string) (*os.File, error)
-get.Cache(source, relpath string) (*os.File, error)
-get.Home(source, relpath string) (*os.File, error)
-get.Append(source, path string) (string, error)
-get.Print(source string) error
-get.Log(source string) error
+get.Bytes(source string) ([]byte, error)
 ```
 
 The `source` is in the form of a URL but includes additional schemas to those expected. See Go documentation for more.
