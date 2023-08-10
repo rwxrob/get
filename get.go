@@ -1,28 +1,67 @@
 package get
 
-import "regexp"
-
-// For comparison, here's the valid git repo expression:
-// /^([A-Za-z0-9]+@|http(|s)\:\/\/)([A-Za-z0-9.]+(:\d+)?)(?::|\/)([\d\/\w.-]+?)(\.git)?$/i
-
-var RegexpSchema = regexp.MustCompile(
-	`^(https?|[A-Za-z0-9]+@[A-Za-z0-9.]+|ssh|file|head|tail|env(.(file|head|tail))?|(home|conf|cache)(.(head|tail))?):`,
+import (
+	"regexp"
+	"strings"
 )
 
-func Schema(url string) string {
-	return RegexpSchema.FindString(url)
-}
+var SSHShortForm = regexp.MustCompile(`[A-Za-z0-9]@[A-Za-z0-9.]`)
 
-func SchemaAndValue(url string) (string, string) {
-	var val string
-	schema := Schema(url)
-	if len(url) > len(schema) {
-		val = url[len(url):]
+// Schema returns the schema up to the first colon if found. Only valid
+// schema combinations will be returned (see source switch for all
+// possible schemas). All others return an empty string for the schema.
+// The second string is always the remaining value (after the colon).
+func Schema(a string) (schema, value string) {
+	parts := strings.SplitN(a, `:`, 2)
+	count := len(parts)
+
+	switch count {
+	case 2:
+		schema = parts[0]
+		value = parts[1]
+	case 1:
+		value = parts[0]
+		return
+	default:
+		value = a
+		return
 	}
-	return schema, val
+
+	switch schema {
+	case "env", "env.file", "env.file.head", "env.file.tail":
+		return
+	case "file", "file.head", "file.tail":
+		return
+	case "head", "tail":
+		return
+	case "home", "home.head", "home.tail":
+		return
+	case "conf", "conf.head", "conf.tail":
+		return
+	case "cache", "cache.head", "cache.tail":
+		return
+	case "ssh", "ssh.head", "ssh.tail":
+		return
+	case "http", "http.head", "http.tail":
+		return
+	case "https", "https.head", "https.tail":
+		return
+	}
+
+	if SSHShortForm.MatchString(schema) {
+		return
+	}
+
+	// looks like we just have a plain string
+	schema = ""
+	value = a
+
+	return
+
 }
 
-func String(source string) (string, error) {
+// String returns
+func String(url string) (string, error) {
 	var it string
 
 	return it, nil
