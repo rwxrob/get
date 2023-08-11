@@ -65,7 +65,8 @@ func ExampleSchema_values_Only() {
 func ExampleSchema_partial() {
 
 	valid := []string{
-		`env:`, `env.file:`, `env.file.first:`, `env.file.last:`,
+		`env:`, `env.first:`, `env.last:`,
+		`env.file:`, `env.file.first:`, `env.file.last:`,
 		`file:`, `file.first:`, `file.last:`,
 		`first:`, `last:`,
 		`home:`, `home.first:`, `home.last:`,
@@ -84,6 +85,8 @@ func ExampleSchema_partial() {
 
 	// Output:
 	// schema: "env" value: ""
+	// schema: "env.first" value: ""
+	// schema: "env.last" value: ""
 	// schema: "env.file" value: ""
 	// schema: "env.file.first" value: ""
 	// schema: "env.file.last" value: ""
@@ -117,7 +120,8 @@ func ExampleSchema_partial() {
 func ExampleSchema_with_Values() {
 
 	valid := []string{
-		`env:VALUE`, `env.file:FILE_PATH`, `env.file.first:FILE_PATH`, `env.file.last:FILE_PATH`,
+		`env:VALUE`, `env.first:VALUE`, `env.last:VALUE`,
+		`env.file:FILE_PATH`, `env.file.first:FILE_PATH`, `env.file.last:FILE_PATH`,
 		`file:VALUE`, `file.first:VALUE`, `file.last:VALUE`,
 		`first:FILE_PATH`, `last:FILE_PATH`,
 		`home:FILE_PATH`, `home.first:FILE_PATH`, `home.last:FILE_PATH`,
@@ -142,6 +146,8 @@ func ExampleSchema_with_Values() {
 
 	// Output:
 	// schema: "env" value: "VALUE"
+	// schema: "env.first" value: "VALUE"
+	// schema: "env.last" value: "VALUE"
 	// schema: "env.file" value: "FILE_PATH"
 	// schema: "env.file.first" value: "FILE_PATH"
 	// schema: "env.file.last" value: "FILE_PATH"

@@ -30,7 +30,9 @@ func Schema(a string) (schema, value string) {
 	}
 
 	switch schema {
-	case "env", "env.file", "env.file.first", "env.file.last":
+	case "env", "env.first", "env.last":
+		return
+	case "env.file", "env.file.first", "env.file.last":
 		return
 	case "file", "file.first", "file.last":
 		return
@@ -147,6 +149,10 @@ func String(a string) (string, error) {
 			return string(byt), err
 		}
 		return string(byt), nil
+	case `env.first`:
+		// TODO
+	case `env.last`:
+		// TODO
 	}
 
 	return it, nil
