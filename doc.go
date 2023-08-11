@@ -9,9 +9,9 @@ location for such data through arguments and such.  For example, the
 following would both be supported without additional logic to detect the
 URL version:
 
-	    foo --token mytoken
-			foo --token conf:thisapp/mytokenfile
-			foo --token env.file.first:TOKEN_FILE_PATH
+	foo --token mytoken
+	foo --token conf:thisapp/mytokenfile
+	foo --token env.file.first:TOKEN_FILE_PATH
 
 This enables a user to store their secret token more securely as a file
 rather than passing it as an open argument on the command line depending

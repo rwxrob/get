@@ -180,25 +180,48 @@ func ExampleFirstLine() {
 }
 
 func ExampleFirstLineOf() {
+
+	// Contains only:
+	//	first line
+	//	second line
+	//	last line
+
 	fmt.Println(get.FirstLineOf(`testdata/datafile`))
+
 	// Output:
 	// first line <nil>
 }
 
 func ExampleLastLine() {
+
 	str := "first line\nsecond line\nlast line\n"
 	fmt.Println(get.LastLine(str))
+
 	str = "first line\nsecond line\nlast line"
 	fmt.Println(get.LastLine(str))
+
 	// Output:
 	// last line
 	// last line
 }
 
 func ExampleLastLineOf() {
+
+	// Contains only:
+	//	first line
+	//	second line
+	//	last line
+
 	fmt.Println(get.LastLineOf(`testdata/datafile`))
 
-	// note that a blank last line is perfectly valid
+	// A blank last line is perfectly valid.
+
+	// Contains extra blank line:
+	//	first line
+	//	second line
+	//	last line
+	//
+
 	line, err := get.LastLineOf(`testdata/datafilereturn`)
 	fmt.Printf("%q %q", line, err)
 

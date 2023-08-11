@@ -69,18 +69,18 @@ func Schema(a string) (schema, value string) {
 // persist string values, for example secrets in files or on secured,
 // remote https or ssh locations :
 //
-//	  (none)    - string as is
-//		env       - value of environment variable by name
-//		file      - full content of local file at path
-//		first     - first line from a local file at path (no line endings)
-//		last      - last line from a local file at path (no line endings)
-//		home      - full content of local file relative to os.UserHomeDir (for systems without ~)
-//		conf      - full content of local file relative os.UserConfigDir
-//		cache     - full content of local file relative os.UserCacheDir
-//		user@host - full content of remote file over ssh (like git, assumes scp)
-//		ssh       - full content of remote file over ssh (like git, assumes scp)
-//		https     - full content of remote HTTP/TLS GET (net/http.DefaultClient)
-//		http      - full content of remote HTTP GET (net/http.DefaultClient)
+//	(none)    - string as is
+//	env       - value of environment variable by name
+//	file      - full content of local file at path
+//	first     - first line from a local file at path (no line endings)
+//	last      - last line from a local file at path (no line endings)
+//	home      - full content of local file relative to os.UserHomeDir (for systems without ~)
+//	conf      - full content of local file relative os.UserConfigDir
+//	cache     - full content of local file relative os.UserCacheDir
+//	user@host - full content of remote file over ssh (like git, assumes scp)
+//	ssh       - full content of remote file over ssh (like git, assumes scp)
+//	https     - full content of remote HTTP/TLS GET (net/http.DefaultClient)
+//	http      - full content of remote HTTP GET (net/http.DefaultClient)
 //
 // In all cases, the source provided in the argument signature is a URL
 // of the normally expected form but with some additional schema/sources
