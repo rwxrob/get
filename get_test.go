@@ -37,6 +37,36 @@ func ExampleString_env_file() {
 	// something
 }
 
+func ExampleString_env_file_first() {
+	os.Setenv(`FOOFILE`, `testdata/datafile`)
+	defer os.Unsetenv(`FOOFILE`)
+
+	it, err := get.String(`env.file.first:FOOFILE`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// first line
+}
+
+func ExampleString_env_file_last() {
+	os.Setenv(`FOOFILE`, `testdata/datafile`)
+	defer os.Unsetenv(`FOOFILE`)
+
+	it, err := get.String(`env.file.last:FOOFILE`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// last line
+}
+
 func ExampleSchema_values_Only() {
 
 	valid := []string{
@@ -234,4 +264,23 @@ func ExampleLastLineOf() {
 	// Output:
 	// last line <nil>
 	// "" %!q(<nil>)
+}
+
+func ExampleHomeFile() {
+
+	// change home to current directory for testing only
+	orig, _ := os.UserHomeDir()
+	os.Setenv(`HOME`, `.`)
+	defer os.Setenv(`HOME`, orig)
+
+	byt, err := get.HomeFile(`testdata/datafile`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(byt))
+
+	// Output:
+	// first line
+	// second line
+	// last line
 }

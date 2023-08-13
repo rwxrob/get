@@ -3,6 +3,7 @@ package get
 import (
 	"bufio"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 )
@@ -30,25 +31,25 @@ func Schema(a string) (schema, value string) {
 	}
 
 	switch schema {
-	case "env", "env.first", "env.last":
+	case `env`, `env.first`, `env.last`:
 		return
-	case "env.file", "env.file.first", "env.file.last":
+	case `env.file`, `env.file.first`, `env.file.last`:
 		return
-	case "file", "file.first", "file.last":
+	case `file`, `file.first`, `file.last`:
 		return
-	case "first", "last":
+	case `first`, `last`:
 		return
-	case "home", "home.first", "home.last":
+	case `home`, `home.first`, `home.last`:
 		return
-	case "conf", "conf.first", "conf.last":
+	case `conf`, `conf.first`, `conf.last`:
 		return
-	case "cache", "cache.first", "cache.last":
+	case `cache`, `cache.first`, `cache.last`:
 		return
-	case "ssh", "ssh.first", "ssh.last":
+	case `ssh`, `ssh.first`, `ssh.last`:
 		return
-	case "http", "http.first", "http.last":
+	case `http`, `http.first`, `http.last`:
 		return
-	case "https", "https.first", "https.last":
+	case `https`, `https.first`, `https.last`:
 		return
 	}
 
@@ -81,8 +82,10 @@ func Schema(a string) (schema, value string) {
 //	cache     - full content of local file relative os.UserCacheDir
 //	user@host - full content of remote file over ssh (like git, assumes scp)
 //	ssh       - full content of remote file over ssh (like git, assumes scp)
-//	https     - full content of remote HTTP/TLS GET (net/http.DefaultClient)
-//	http      - full content of remote HTTP GET (net/http.DefaultClient)
+//	http(s)   - full content of remote HTTP/TLS GET (net/http.DefaultClient)
+//
+// For more information about how the data is acquired and parsed see
+// the relevant helper functions ([HomeFile], [CacheFile], [ConfFile]
 //
 // In all cases, the source provided in the argument signature is a URL
 // of the normally expected form but with some additional schema/sources
@@ -126,6 +129,13 @@ func Schema(a string) (schema, value string) {
 // ASCII-armored text file can be used with get.String and other formats
 // with get.Bytes.
 //
+// # External dependencies
+//
+// The user@host and ssh URLs require the scp program be installed and
+// in the PATH for the host system. Most all systems that have ssh
+// installed (openssh, for example) automatically have scp installed as
+// well.
+//
 // # Design considerations
 //
 // Parsing of the data is isolated to the first or last line
@@ -140,22 +150,144 @@ func String(a string) (string, error) {
 	}
 
 	switch schema {
+
 	case `env`:
 		return os.Getenv(value), nil
+	case `env.first`:
+		return FirstLine(os.Getenv(value)), nil
+	case `env.last`:
+		return LastLine(os.Getenv(value)), nil
+
 	case `env.file`:
-		file := os.Getenv(value)
-		byt, err := os.ReadFile(file)
+		byt, err := os.ReadFile(os.Getenv(value))
 		if err != nil {
-			return string(byt), err
+			return "", err
 		}
 		return string(byt), nil
-	case `env.first`:
-		// TODO
-	case `env.last`:
-		// TODO
-	}
+	case `env.file.first`:
+		return FirstLineOf(os.Getenv(value))
+	case `env.file.last`:
+		return LastLineOf(os.Getenv(value))
 
+	case `file`:
+		byt, err := os.ReadFile(value)
+		if err != nil {
+			return "", err
+		}
+		return string(byt), nil
+	case `file.first`:
+		return FirstLineOf(value)
+	case `file.last`:
+		return LastLineOf(value)
+
+	case `first`:
+		return FirstLine(value), nil
+	case `last`:
+		return LastLine(value), nil
+
+	case `home`:
+		byt, err := HomeFile(value)
+		if err != nil {
+			return "", err
+		}
+		return string(byt), nil
+	case `home.first`:
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		path := path.Join(home, value)
+		return FirstLineOf(path)
+	case `home.last`:
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		path := path.Join(home, value)
+		return LastLineOf(path)
+
+	case `conf`:
+		byt, err := ConfFile(value)
+		if err != nil {
+			return "", err
+		}
+		return string(byt), nil
+	case `conf.first`:
+		conf, err := os.UserConfigDir()
+		if err != nil {
+			return "", err
+		}
+		path := path.Join(conf, value)
+		return FirstLineOf(path)
+	case `conf.last`:
+		conf, err := os.UserConfigDir()
+		if err != nil {
+			return "", err
+		}
+		path := path.Join(conf, value)
+		return LastLineOf(path)
+
+	case `cache`:
+		byt, err := CacheFile(value)
+		if err != nil {
+			return "", err
+		}
+		return string(byt), nil
+	case `cache.first`:
+		cache, err := os.UserCacheDir()
+		if err != nil {
+			return "", err
+		}
+		path := path.Join(cache, value)
+		return FirstLineOf(path)
+	case `cache.last`:
+		cache, err := os.UserCacheDir()
+		if err != nil {
+			return "", err
+		}
+		path := path.Join(cache, value)
+		return LastLineOf(path)
+
+	case `ssh`:
+	case `ssh.first`:
+	case `ssh.last`:
+
+	case `http`, `https`:
+	case `http.first`, `https.first`:
+	case `http.last`, `https.last`:
+
+	}
 	return it, nil
+}
+
+// HomeFile returns the []byte content of a file within the
+// os.UserHomeDir.
+func HomeFile(relpath string) ([]byte, error) {
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+	return os.ReadFile(path.Join(dir, relpath))
+}
+
+// CacheFile returns the []byte content of a file within the
+// os.UserCacheDir.
+func CacheFile(relpath string) ([]byte, error) {
+	dir, err := os.UserCacheDir()
+	if err != nil {
+		return nil, err
+	}
+	return os.ReadFile(path.Join(dir, relpath))
+}
+
+// ConfFile returns the []byte content of a file within the
+// os.UserConfigDir.
+func ConfFile(relpath string) ([]byte, error) {
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		return nil, err
+	}
+	return os.ReadFile(path.Join(dir, relpath))
 }
 
 // FirstLine returns the first line of the string or []byte.
@@ -205,4 +337,28 @@ func LastLineOf(path string) (string, error) {
 		prev = s.Text()
 	}
 	return prev, nil
+}
+
+// RemoteFileSCPTemp returns an file opened for reading after having
+// copied it with scp to a temporary file and opened it there. No
+// attempt to remove the copied temporary file is done leaving this task
+// to the caller.
+
+//RemoteFileSCP returns the entire content of the remote file by first
+//copying it with scp into a temporary local file and then buffering the
+//entire file into the []byte slice returned.
+
+// FirstLineOfSSH returns only the first line of a remote file by
+// calling head on the file over an ssh connection.
+
+// LastLineOfSSH returns the last line of a remote file by calling tail
+// on the file at the path indicated making it safe for grabbing
+// exactly one last line of a large remote file (log, etc.). If the
+// remote system does not support the tail command returns an error
+// stating as much. The remote string is identical to those passed to
+// scp (see RemoteFileSCP).
+func LastLineOfSSH(remote string) (string, error) {
+	var buf string
+	// TODO should we attempt to use tail instead of scp?
+	return buf, nil
 }
