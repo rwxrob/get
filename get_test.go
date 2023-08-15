@@ -328,3 +328,78 @@ func ExampleFirstLineOfSSH() {
 	/// Output:
 	// first line
 }
+
+func ExampleRegxSSHURI() {
+
+	parts := get.RegxSSHURI.FindStringSubmatch(`ssh://user@host:22/some/file`)
+	fmt.Println(parts[0])
+	fmt.Println(parts[1])
+	fmt.Println(parts[2])
+	fmt.Println(parts[3])
+	fmt.Println(parts[4])
+	fmt.Println(parts[5])
+
+	// Output:
+	// ssh://user@host:22/some/file
+	// user@host:22
+	// user
+	// host
+	// 22
+	// /some/file
+}
+
+func ExampleRegxSSHURI_nopath() {
+
+	parts := get.RegxSSHURI.FindStringSubmatch(`ssh://user@host:22`)
+	fmt.Println(parts[0])
+	fmt.Println(parts[1])
+	fmt.Println(parts[2])
+	fmt.Println(parts[3])
+	fmt.Println(parts[4])
+	fmt.Println(parts[5])
+
+	// Output:
+	// ssh://user@host:22
+	// user@host:22
+	// user
+	// host
+	// 22
+}
+
+func ExampleRegxSSHURI_nouser() {
+
+	parts := get.RegxSSHURI.FindStringSubmatch(`ssh://host:22/some/file`)
+	fmt.Println(parts[0])
+	fmt.Println(parts[1])
+	fmt.Println(parts[2])
+	fmt.Println(parts[3])
+	fmt.Println(parts[4])
+	fmt.Println(parts[5])
+
+	// Output:
+	// ssh://host:22/some/file
+	// host:22
+	//
+	// host
+	// 22
+	// /some/file
+}
+
+func ExampleRegxSSHURI_domain_Only() {
+
+	parts := get.RegxSSHURI.FindStringSubmatch(`ssh://host/some/file`)
+	fmt.Println(parts[0])
+	fmt.Println(parts[1])
+	fmt.Println(parts[2])
+	fmt.Println(parts[3])
+	fmt.Println(parts[4])
+	fmt.Println(parts[5])
+
+	// Output:
+	// ssh://host/some/file
+	// host
+	//
+	// host
+	//
+	// /some/file
+}

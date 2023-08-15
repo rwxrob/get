@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var SSHLongForm = regexp.MustCompile(`ssh://(?:[A-Za-z0-9]@)?[A-Za-z0-9.](?::[0-9]{1,7})?`)
+var RegxSSHURI = regexp.MustCompile(`ssh://((?:([A-Za-z0-9]+)@)?([A-Za-z0-9.]+)(?::([0-9]{1,7}))?)(\S+)?`)
 
 // Schema returns the schema up to the first colon if found. Only valid
 // schema combinations will be returned (see source switch for all
@@ -172,15 +172,10 @@ func String(a string) (string, error) {
 			return "", err
 		}
 		return string(byt), nil
-	case `file.first`:
+	case `file.first`, `first`:
 		return FirstLineOf(value)
-	case `file.last`:
+	case `file.last`, `last`:
 		return LastLineOf(value)
-
-	case `first`:
-		return FirstLine(value), nil
-	case `last`:
-		return LastLine(value), nil
 
 	case `home`:
 		byt, err := HomeFile(value)
@@ -247,6 +242,8 @@ func String(a string) (string, error) {
 
 	case `ssh`:
 	case `ssh.first`:
+		//TODO
+		//return FirstLineOfSSH(target, path)
 	case `ssh.last`:
 
 	case `http`, `https`:
