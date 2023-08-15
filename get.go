@@ -3,12 +3,13 @@ package get
 import (
 	"bufio"
 	"os"
+	"os/exec"
 	"path"
 	"regexp"
 	"strings"
 )
 
-var SSHShortForm = regexp.MustCompile(`[A-Za-z0-9]@[A-Za-z0-9.]`)
+var SSHLongForm = regexp.MustCompile(`ssh://(?:[A-Za-z0-9]@)?[A-Za-z0-9.](?::[0-9]{1,7})?`)
 
 // Schema returns the schema up to the first colon if found. Only valid
 // schema combinations will be returned (see source switch for all
@@ -53,10 +54,6 @@ func Schema(a string) (schema, value string) {
 		return
 	}
 
-	if SSHShortForm.MatchString(schema) {
-		return
-	}
-
 	// looks like we just have a plain string
 	schema = ""
 	value = a
@@ -72,17 +69,33 @@ func Schema(a string) (schema, value string) {
 // persist string values, for example secrets in files or on secured,
 // remote https or ssh locations :
 //
-//	(none)    - string as is
-//	env       - value of environment variable by name
-//	file      - full content of local file at path
-//	first     - first line from a local file at path (no line endings)
-//	last      - last line from a local file at path (no line endings)
-//	home      - full content of local file relative to os.UserHomeDir (for systems without ~)
-//	conf      - full content of local file relative os.UserConfigDir
-//	cache     - full content of local file relative os.UserCacheDir
-//	user@host - full content of remote file over ssh (like git, assumes scp)
-//	ssh       - full content of remote file over ssh (like git, assumes scp)
-//	http(s)   - full content of remote HTTP/TLS GET (net/http.DefaultClient)
+//	(none)         - string as is
+//	env            - value of environment variable by name
+//	env.first      - file line of value of environment variable by name
+//	env.last       - last line of value of environment variable by name
+//	env.file       - full content file at path from environment variable
+//	env.file.first - first line of file at path from environment variable
+//	env.file.last  - last line of file at path from environment variable
+//	file           - full content of local file at path
+//	file.first     - first line of file
+//	file.last      - last line of file
+//	first          - (same as file.first)
+//	last           - (same as file.last)
+//	home           - full content of local file relative to os.UserHomeDir (for systems without ~)
+//	home.first     - first line of home
+//	home.last      - last line of home
+//	conf           - full content of local file relative os.UserConfigDir
+//	conf.first     - first line of conf
+//	conf.last      - last line of conf
+//	cache          - full content of local file relative os.UserCacheDir
+//	cache.first    - first line of cache
+//	cache.last     - last line of cache
+//	ssh            - full content of remote file over ssh (like scp)
+//	ssh.first      - first line of ssh (with head)
+//	ssh.last       - last line of ssh (with tail)
+//	http(s)        - full content of remote HTTP/TLS GET (net/http.DefaultClient)
+//	http(s).first  - first line of http(s) (from full GET)
+//	http(s).last   - last line of https(s) (from full GET)
 //
 // For more information about how the data is acquired and parsed see
 // the relevant helper functions ([HomeFile], [CacheFile], [ConfFile]
@@ -95,16 +108,6 @@ func Schema(a string) (schema, value string) {
 // any of the reserved schema type combinations up to the first colon.
 // Therefore, use of this package where colons might be value string
 // values should be used with caution.
-//
-// All of these methods (except the user@host ssh shortcut which
-// technically doesn't qualify as a URL) can be combined using a simple
-// dotted notation pipeline. In such cases, the string resulting from
-// each schema type is used as the value for the next. For example,
-// env.file.first:TOKEN_FILE would first lookup the value of the
-// environment variable TOKEN_FILE and then use that as the value for
-// file. So if TOKEN_FILE environment variable contained ~/.mytoken then
-// file: ~/.mytoken would be evaluated and only the first chomped line
-// returned.
 //
 // # Line endings
 //
@@ -131,16 +134,10 @@ func Schema(a string) (schema, value string) {
 //
 // # External dependencies
 //
-// The user@host and ssh URLs require the scp program be installed and
+// The ssh schemas require ssh and scp to be installed and available
 // in the PATH for the host system. Most all systems that have ssh
 // installed (openssh, for example) automatically have scp installed as
 // well.
-//
-// # Design considerations
-//
-// Parsing of the data is isolated to the first or last line
-// (last) and always will be. Additional parsing and/or unmarshalling is
-// appropriately left to the caller.
 func String(a string) (string, error) {
 	var it string
 	schema, value := Schema(a)
@@ -349,16 +346,39 @@ func LastLineOf(path string) (string, error) {
 //entire file into the []byte slice returned.
 
 // FirstLineOfSSH returns only the first line of a remote file by
-// calling head on the file over an ssh connection.
+// calling head on the file over an ssh connection. Otherwise, identical
+// to LastLineOfSSH.
+func FirstLineOfSSH(target, path string) (string, error) {
+	return SSHOut(target, `head -1 `+path)
+}
 
 // LastLineOfSSH returns the last line of a remote file by calling tail
 // on the file at the path indicated making it safe for grabbing
-// exactly one last line of a large remote file (log, etc.). If the
-// remote system does not support the tail command returns an error
-// stating as much. The remote string is identical to those passed to
-// scp (see RemoteFileSCP).
-func LastLineOfSSH(remote string) (string, error) {
-	var buf string
-	// TODO should we attempt to use tail instead of scp?
-	return buf, nil
+// exactly one last line of a large remote file (log, etc.).
+//
+// If the remote system does not support the tail command returns an error
+// stating as much. See SSHOut for valid target formats. The path can be
+// relative to the login home directory or fully qualified (beginning
+// with slash).
+func LastLineOfSSH(target, path string) (string, error) {
+	return SSHOut(target, `tail -1 `+path)
+}
+
+// SSHOut sends the command string to the target using the ssh command
+// on the host system (not the ssh package) and returns the standard
+// output. It is the equivalent of the following command line:
+//
+//	ssh '<target>' '<command>'
+//
+// Note that the <target> may be either a relative ssh shortcut (ex:
+// user@localhost) or a fully qualified ssh URI (ex: ssh:
+// //user@localhost:22). See the documentation on the ssh command itself
+// for more details.
+func SSHOut(target, command string) (string, error) {
+	sshexe, err := exec.LookPath(`ssh`)
+	if err != nil {
+		return "", err
+	}
+	byt, err := exec.Command(sshexe, target, command).Output()
+	return string(byt), err
 }

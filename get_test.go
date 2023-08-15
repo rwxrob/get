@@ -105,7 +105,6 @@ func ExampleSchema_partial() {
 		`ssh:`, `ssh.first:`, `ssh.last:`,
 		`https:`, `https.first:`, `https.last:`,
 		`http:`, `http.first:`, `http.last:`,
-		`user@example.com:`,
 	}
 
 	for _, it := range valid {
@@ -143,7 +142,6 @@ func ExampleSchema_partial() {
 	// schema: "http" value: ""
 	// schema: "http.first" value: ""
 	// schema: "http.last" value: ""
-	// schema: "user@example.com" value: ""
 
 }
 
@@ -166,7 +164,6 @@ func ExampleSchema_with_Values() {
 		`http://example.com/some/place`,
 		`http.first://example.com/some/place`,
 		`http.last://example.com/some/place`,
-		`user@example.com:path/to/file`,
 	}
 
 	for _, it := range valid {
@@ -204,7 +201,6 @@ func ExampleSchema_with_Values() {
 	// schema: "http" value: "//example.com/some/place"
 	// schema: "http.first" value: "//example.com/some/place"
 	// schema: "http.last" value: "//example.com/some/place"
-	// schema: "user@example.com" value: "path/to/file"
 
 }
 
@@ -283,4 +279,52 @@ func ExampleHomeFile() {
 	// first line
 	// second line
 	// last line
+}
+
+func ExampleSSHOut_short_Form() {
+
+	out, err := get.SSHOut(`localhost`, `echo something`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(out)
+
+	/// Output:
+	// something
+}
+
+func ExampleSSHOut_long_Form() {
+
+	out, err := get.SSHOut(`ssh://rwxrob@localhost:22`, `echo something`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(out)
+
+	/// Output:
+	// something
+}
+
+func ExampleLastLineOfSSH() {
+
+	out, err := get.LastLineOfSSH(`ssh://rwxrob@localhost:22`, `somefile.txt`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(out)
+
+	/// Output:
+	// last line
+}
+
+func ExampleFirstLineOfSSH() {
+
+	out, err := get.FirstLineOfSSH(`ssh://rwxrob@localhost:22`, `somefile.txt`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(out)
+
+	/// Output:
+	// first line
 }
