@@ -37,11 +37,11 @@ func ExampleString_env_file() {
 	// something
 }
 
-func ExampleString_env_file_first() {
+func ExampleString_env_file_head() {
 	os.Setenv(`FOOFILE`, `testdata/datafile`)
 	defer os.Unsetenv(`FOOFILE`)
 
-	it, err := get.String(`env.file.first:FOOFILE`)
+	it, err := get.String(`env.file.head:FOOFILE`)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -52,11 +52,11 @@ func ExampleString_env_file_first() {
 	// first line
 }
 
-func ExampleString_env_file_last() {
+func ExampleString_env_file_tail() {
 	os.Setenv(`FOOFILE`, `testdata/datafile`)
 	defer os.Unsetenv(`FOOFILE`)
 
-	it, err := get.String(`env.file.last:FOOFILE`)
+	it, err := get.String(`env.file.tail:FOOFILE`)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -95,16 +95,16 @@ func ExampleSchema_values_Only() {
 func ExampleSchema_partial() {
 
 	valid := []string{
-		`env:`, `env.first:`, `env.last:`,
-		`env.file:`, `env.file.first:`, `env.file.last:`,
-		`file:`, `file.first:`, `file.last:`,
-		`first:`, `last:`,
-		`home:`, `home.first:`, `home.last:`,
-		`conf:`, `conf.first:`, `conf.last:`,
-		`cache:`, `cache.first:`, `cache.last:`,
-		`ssh:`, `ssh.first:`, `ssh.last:`,
-		`https:`, `https.first:`, `https.last:`,
-		`http:`, `http.first:`, `http.last:`,
+		`env:`, `env.head:`, `env.tail:`,
+		`env.file:`, `env.file.head:`, `env.file.tail:`,
+		`file:`, `file.head:`, `file.tail:`,
+		`head:`, `tail:`,
+		`home:`, `home.head:`, `home.tail:`,
+		`conf:`, `conf.head:`, `conf.tail:`,
+		`cache:`, `cache.head:`, `cache.tail:`,
+		`scp:`, `ssh.head:`, `ssh.tail:`,
+		`https:`, `https.head:`, `https.tail:`,
+		`http:`, `http.head:`, `http.tail:`,
 	}
 
 	for _, it := range valid {
@@ -114,56 +114,56 @@ func ExampleSchema_partial() {
 
 	// Output:
 	// schema: "env" value: ""
-	// schema: "env.first" value: ""
-	// schema: "env.last" value: ""
+	// schema: "env.head" value: ""
+	// schema: "env.tail" value: ""
 	// schema: "env.file" value: ""
-	// schema: "env.file.first" value: ""
-	// schema: "env.file.last" value: ""
+	// schema: "env.file.head" value: ""
+	// schema: "env.file.tail" value: ""
 	// schema: "file" value: ""
-	// schema: "file.first" value: ""
-	// schema: "file.last" value: ""
-	// schema: "first" value: ""
-	// schema: "last" value: ""
+	// schema: "file.head" value: ""
+	// schema: "file.tail" value: ""
+	// schema: "head" value: ""
+	// schema: "tail" value: ""
 	// schema: "home" value: ""
-	// schema: "home.first" value: ""
-	// schema: "home.last" value: ""
+	// schema: "home.head" value: ""
+	// schema: "home.tail" value: ""
 	// schema: "conf" value: ""
-	// schema: "conf.first" value: ""
-	// schema: "conf.last" value: ""
+	// schema: "conf.head" value: ""
+	// schema: "conf.tail" value: ""
 	// schema: "cache" value: ""
-	// schema: "cache.first" value: ""
-	// schema: "cache.last" value: ""
-	// schema: "ssh" value: ""
-	// schema: "ssh.first" value: ""
-	// schema: "ssh.last" value: ""
+	// schema: "cache.head" value: ""
+	// schema: "cache.tail" value: ""
+	// schema: "scp" value: ""
+	// schema: "ssh.head" value: ""
+	// schema: "ssh.tail" value: ""
 	// schema: "https" value: ""
-	// schema: "https.first" value: ""
-	// schema: "https.last" value: ""
+	// schema: "https.head" value: ""
+	// schema: "https.tail" value: ""
 	// schema: "http" value: ""
-	// schema: "http.first" value: ""
-	// schema: "http.last" value: ""
+	// schema: "http.head" value: ""
+	// schema: "http.tail" value: ""
 
 }
 
 func ExampleSchema_with_Values() {
 
 	valid := []string{
-		`env:VALUE`, `env.first:VALUE`, `env.last:VALUE`,
-		`env.file:FILE_PATH`, `env.file.first:FILE_PATH`, `env.file.last:FILE_PATH`,
-		`file:VALUE`, `file.first:VALUE`, `file.last:VALUE`,
-		`first:FILE_PATH`, `last:FILE_PATH`,
-		`home:FILE_PATH`, `home.first:FILE_PATH`, `home.last:FILE_PATH`,
-		`conf:FILE_PATH`, `conf.first:FILE_PATH`, `conf.last:FILE_PATH`,
-		`cache:FILE_PATH`, `cache.first:FILE_PATH`, `cache.last:FILE_PATH`,
-		`ssh://user@example.com:1234/some/place`,
-		`ssh.first://user@example.com:1234/some/place`,
-		`ssh.last://user@example.com:1234/some/place`,
+		`env:VALUE`, `env.head:VALUE`, `env.tail:VALUE`,
+		`env.file:FILE_PATH`, `env.file.head:FILE_PATH`, `env.file.tail:FILE_PATH`,
+		`file:VALUE`, `file.head:VALUE`, `file.tail:VALUE`,
+		`head:FILE_PATH`, `tail:FILE_PATH`,
+		`home:FILE_PATH`, `home.head:FILE_PATH`, `home.tail:FILE_PATH`,
+		`conf:FILE_PATH`, `conf.head:FILE_PATH`, `conf.tail:FILE_PATH`,
+		`cache:FILE_PATH`, `cache.head:FILE_PATH`, `cache.tail:FILE_PATH`,
+		`scp://user@example.com:1234/some/place`,
+		`ssh.head://user@example.com:1234/some/place`,
+		`ssh.tail://user@example.com:1234/some/place`,
 		`https://example.com/some/place`,
-		`https.first://example.com/some/place`,
-		`https.last://example.com/some/place`,
+		`https.head://example.com/some/place`,
+		`https.tail://example.com/some/place`,
 		`http://example.com/some/place`,
-		`http.first://example.com/some/place`,
-		`http.last://example.com/some/place`,
+		`http.head://example.com/some/place`,
+		`http.tail://example.com/some/place`,
 	}
 
 	for _, it := range valid {
@@ -173,34 +173,34 @@ func ExampleSchema_with_Values() {
 
 	// Output:
 	// schema: "env" value: "VALUE"
-	// schema: "env.first" value: "VALUE"
-	// schema: "env.last" value: "VALUE"
+	// schema: "env.head" value: "VALUE"
+	// schema: "env.tail" value: "VALUE"
 	// schema: "env.file" value: "FILE_PATH"
-	// schema: "env.file.first" value: "FILE_PATH"
-	// schema: "env.file.last" value: "FILE_PATH"
+	// schema: "env.file.head" value: "FILE_PATH"
+	// schema: "env.file.tail" value: "FILE_PATH"
 	// schema: "file" value: "VALUE"
-	// schema: "file.first" value: "VALUE"
-	// schema: "file.last" value: "VALUE"
-	// schema: "first" value: "FILE_PATH"
-	// schema: "last" value: "FILE_PATH"
+	// schema: "file.head" value: "VALUE"
+	// schema: "file.tail" value: "VALUE"
+	// schema: "head" value: "FILE_PATH"
+	// schema: "tail" value: "FILE_PATH"
 	// schema: "home" value: "FILE_PATH"
-	// schema: "home.first" value: "FILE_PATH"
-	// schema: "home.last" value: "FILE_PATH"
+	// schema: "home.head" value: "FILE_PATH"
+	// schema: "home.tail" value: "FILE_PATH"
 	// schema: "conf" value: "FILE_PATH"
-	// schema: "conf.first" value: "FILE_PATH"
-	// schema: "conf.last" value: "FILE_PATH"
+	// schema: "conf.head" value: "FILE_PATH"
+	// schema: "conf.tail" value: "FILE_PATH"
 	// schema: "cache" value: "FILE_PATH"
-	// schema: "cache.first" value: "FILE_PATH"
-	// schema: "cache.last" value: "FILE_PATH"
-	// schema: "ssh" value: "//user@example.com:1234/some/place"
-	// schema: "ssh.first" value: "//user@example.com:1234/some/place"
-	// schema: "ssh.last" value: "//user@example.com:1234/some/place"
+	// schema: "cache.head" value: "FILE_PATH"
+	// schema: "cache.tail" value: "FILE_PATH"
+	// schema: "scp" value: "//user@example.com:1234/some/place"
+	// schema: "ssh.head" value: "//user@example.com:1234/some/place"
+	// schema: "ssh.tail" value: "//user@example.com:1234/some/place"
 	// schema: "https" value: "//example.com/some/place"
-	// schema: "https.first" value: "//example.com/some/place"
-	// schema: "https.last" value: "//example.com/some/place"
+	// schema: "https.head" value: "//example.com/some/place"
+	// schema: "https.tail" value: "//example.com/some/place"
 	// schema: "http" value: "//example.com/some/place"
-	// schema: "http.first" value: "//example.com/some/place"
-	// schema: "http.last" value: "//example.com/some/place"
+	// schema: "http.head" value: "//example.com/some/place"
+	// schema: "http.tail" value: "//example.com/some/place"
 
 }
 
@@ -319,7 +319,7 @@ func ExampleLastLineOfSSH() {
 
 func ExampleFirstLineOfSSH() {
 
-	out, err := get.FirstLineOfSSH(`ssh://rwxrob@localhost:22`, `somefile.txt`)
+	out, err := get.FirstLineOfSSH(`ssh://rwxrob@localhost:22/somefile.txt`)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -327,81 +327,6 @@ func ExampleFirstLineOfSSH() {
 
 	/// Output:
 	// first line
-}
-
-func ExampleRegxSSHURI() {
-
-	parts := get.RegxSSHURI.FindStringSubmatch(`ssh://user@host:22/some/file`)
-	fmt.Println(parts[0])
-	fmt.Println(parts[1])
-	fmt.Println(parts[2])
-	fmt.Println(parts[3])
-	fmt.Println(parts[4])
-	fmt.Println(parts[5])
-
-	// Output:
-	// ssh://user@host:22/some/file
-	// user@host:22
-	// user
-	// host
-	// 22
-	// /some/file
-}
-
-func ExampleRegxSSHURI_nopath() {
-
-	parts := get.RegxSSHURI.FindStringSubmatch(`ssh://user@host:22`)
-	fmt.Println(parts[0])
-	fmt.Println(parts[1])
-	fmt.Println(parts[2])
-	fmt.Println(parts[3])
-	fmt.Println(parts[4])
-	fmt.Println(parts[5])
-
-	// Output:
-	// ssh://user@host:22
-	// user@host:22
-	// user
-	// host
-	// 22
-}
-
-func ExampleRegxSSHURI_nouser() {
-
-	parts := get.RegxSSHURI.FindStringSubmatch(`ssh://host:22/some/file`)
-	fmt.Println(parts[0])
-	fmt.Println(parts[1])
-	fmt.Println(parts[2])
-	fmt.Println(parts[3])
-	fmt.Println(parts[4])
-	fmt.Println(parts[5])
-
-	// Output:
-	// ssh://host:22/some/file
-	// host:22
-	//
-	// host
-	// 22
-	// /some/file
-}
-
-func ExampleRegxSSHURI_domain_Only() {
-
-	parts := get.RegxSSHURI.FindStringSubmatch(`ssh://host/some/file`)
-	fmt.Println(parts[0])
-	fmt.Println(parts[1])
-	fmt.Println(parts[2])
-	fmt.Println(parts[3])
-	fmt.Println(parts[4])
-	fmt.Println(parts[5])
-
-	// Output:
-	// ssh://host/some/file
-	// host
-	//
-	// host
-	//
-	// /some/file
 }
 
 func ExampleRemoteSCP_random_To() {
@@ -442,4 +367,73 @@ func ExampleFirstFileIn() {
 	fmt.Printf("%q\n", file)
 	/// Output:
 	// "datafile"
+}
+
+func ExampleSSHURI_UpdateAddr() {
+
+	uri := &get.SSHURI{
+		Schema: `ssh`,
+		Host:   `host`,
+		User:   `user`,
+		Port:   `22`,
+	}
+
+	uri.UpdateAddr()
+	fmt.Println(uri.Addr)
+
+	uri.Port = ``
+	uri.UpdateAddr()
+	fmt.Println(uri.Addr)
+
+	uri.User = ``
+	uri.UpdateAddr()
+	fmt.Println(uri.Addr)
+
+	uri.Host = ``
+	uri.UpdateAddr()
+	fmt.Println(uri.Addr)
+
+	// Output:
+	// user@host:22
+	// user@host
+	// host
+	//
+
+}
+
+func ExampleParseSSHURI() {
+
+	// canonical but not that some/path is path, not /some/path
+	uri := get.ParseSSHURI(`ssh://user@host:22/some/path`)
+	fmt.Println(uri)
+	fmt.Println(uri.Path)
+
+	// head and tail schema extensions supported
+	uri = get.ParseSSHURI(`ssh.head://user@host:22/some/path`)
+	fmt.Println(uri)
+
+	// no host is invalid
+	uri = get.ParseSSHURI(`ssh.head://user@:22/some/path`)
+	fmt.Println(uri)
+
+	// no path
+	uri = get.ParseSSHURI(`ssh://user@host:22`)
+	fmt.Println(uri)
+
+	// no port
+	uri = get.ParseSSHURI(`ssh://user@host`)
+	fmt.Println(uri)
+
+	// no user
+	uri = get.ParseSSHURI(`ssh://host`)
+	fmt.Println(uri)
+
+	// Output:
+	// ssh://user@host:22/some/path
+	// some/path
+	// ssh.head://user@host:22/some/path
+	// <nil>
+	// ssh://user@host:22
+	// ssh://user@host
+	// ssh://host
 }

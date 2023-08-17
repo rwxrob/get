@@ -6,11 +6,10 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"regexp"
 	"strings"
-)
 
-var RegxSSHURI = regexp.MustCompile(`ssh://((?:([A-Za-z0-9]+)@)?([A-Za-z0-9.]+)(?::([0-9]{1,7}))?)(\S+)?`)
+	"github.com/rwxrob/get/expr"
+)
 
 // Schema returns the schema up to the first colon if found. Only valid
 // schema combinations will be returned (see source switch for all
@@ -33,25 +32,27 @@ func Schema(a string) (schema, value string) {
 	}
 
 	switch schema {
-	case `env`, `env.first`, `env.last`:
+	case `env`, `env.head`, `env.tail`:
 		return
-	case `env.file`, `env.file.first`, `env.file.last`:
+	case `env.file`, `env.file.head`, `env.file.tail`:
 		return
-	case `file`, `file.first`, `file.last`:
+	case `file`, `file.head`, `file.tail`:
 		return
-	case `first`, `last`:
+	case `head`, `tail`:
 		return
-	case `home`, `home.first`, `home.last`:
+	case `home`, `home.head`, `home.tail`:
 		return
-	case `conf`, `conf.first`, `conf.last`:
+	case `conf`, `conf.head`, `conf.tail`:
 		return
-	case `cache`, `cache.first`, `cache.last`:
+	case `cache`, `cache.head`, `cache.tail`:
 		return
-	case `ssh`, `ssh.first`, `ssh.last`:
+	case `scp`:
 		return
-	case `http`, `http.first`, `http.last`:
+	case `ssh.head`, `ssh.tail`:
 		return
-	case `https`, `https.first`, `https.last`:
+	case `http`, `http.head`, `http.tail`:
+		return
+	case `https`, `https.head`, `https.tail`:
 		return
 	}
 
@@ -72,31 +73,31 @@ func Schema(a string) (schema, value string) {
 //
 //	(none)         - string as is
 //	env            - value of environment variable by name
-//	env.first      - file line of value of environment variable by name
-//	env.last       - last line of value of environment variable by name
+//	env.head      - file line of value of environment variable by name
+//	env.tail       - tail line of value of environment variable by name
 //	env.file       - full content file at path from environment variable
-//	env.file.first - first line of file at path from environment variable
-//	env.file.last  - last line of file at path from environment variable
+//	env.file.head - head line of file at path from environment variable
+//	env.file.tail  - tail line of file at path from environment variable
 //	file           - full content of local file at path
-//	file.first     - first line of file
-//	file.last      - last line of file
-//	first          - (same as file.first)
-//	last           - (same as file.last)
+//	file.head     - head line of file
+//	file.tail      - tail line of file
+//	head          - (same as file.head)
+//	tail           - (same as file.tail)
 //	home           - full content of local file relative to os.UserHomeDir (for systems without ~)
-//	home.first     - first line of home
-//	home.last      - last line of home
+//	home.head     - head line of home
+//	home.tail      - tail line of home
 //	conf           - full content of local file relative os.UserConfigDir
-//	conf.first     - first line of conf
-//	conf.last      - last line of conf
+//	conf.head     - head line of conf
+//	conf.tail      - tail line of conf
 //	cache          - full content of local file relative os.UserCacheDir
-//	cache.first    - first line of cache
-//	cache.last     - last line of cache
-//	ssh            - full content of remote file over ssh (like scp)
-//	ssh.first      - first line of ssh (with head)
-//	ssh.last       - last line of ssh (with tail)
+//	cache.head    - head line of cache
+//	cache.tail     - tail line of cache
+//	scp            - full content of remote file over scp
+//	ssh.head      - head line of remote file with ssh head -1
+//	ssh.tail       - tail line of remote file with ssh tail -1
 //	http(s)        - full content of remote HTTP/TLS GET (net/http.DefaultClient)
-//	http(s).first  - first line of http(s) (from full GET)
-//	http(s).last   - last line of https(s) (from full GET)
+//	http(s).head  - head line of http(s) (from full GET)
+//	http(s).tail   - tail line of https(s) (from full GET)
 //
 // For more information about how the data is acquired and parsed see
 // the relevant helper functions ([HomeFile], [CacheFile], [ConfFile]
@@ -112,13 +113,13 @@ func Schema(a string) (schema, value string) {
 //
 // # Line endings
 //
-// Note that except for first and last the line endings are always
+// Note that except for head and tail the line endings are always
 // preserved if they are included. The caller must remove these if
 // needed.
 //
 // # Enabling comments in files
 //
-// By using first and last comments of any kind may be included in the
+// By using head and tail comments of any kind may be included in the
 // data itself. For example, the command for how to retrieve a token
 // might be included on the line after the first line that contains the
 // token itself; or, a strong warning never to divulge a secret could be
@@ -139,21 +140,23 @@ func Schema(a string) (schema, value string) {
 // in the PATH for the host system. Most all systems that have ssh
 // installed (openssh, for example) automatically have scp installed as
 // well.
-func String(a string) (string, error) {
-	var it string
-	schema, value := Schema(a)
+func String(target string) (string, error) {
+	schema, value := Schema(target)
 
+	// not a reserved schema, must just be a string
 	if len(schema) == 0 {
-		return value, nil
+		return target, nil
 	}
 
 	switch schema {
 
 	case `env`:
 		return os.Getenv(value), nil
-	case `env.first`:
+
+	case `env.head`:
 		return FirstLine(os.Getenv(value)), nil
-	case `env.last`:
+
+	case `env.tail`:
 		return LastLine(os.Getenv(value)), nil
 
 	case `env.file`:
@@ -162,9 +165,11 @@ func String(a string) (string, error) {
 			return "", err
 		}
 		return string(byt), nil
-	case `env.file.first`:
+
+	case `env.file.head`:
 		return FirstLineOf(os.Getenv(value))
-	case `env.file.last`:
+
+	case `env.file.tail`:
 		return LastLineOf(os.Getenv(value))
 
 	case `file`:
@@ -173,9 +178,11 @@ func String(a string) (string, error) {
 			return "", err
 		}
 		return string(byt), nil
-	case `file.first`, `first`:
+
+	case `file.head`, `head`:
 		return FirstLineOf(value)
-	case `file.last`, `last`:
+
+	case `file.tail`, `tail`:
 		return LastLineOf(value)
 
 	case `home`:
@@ -184,14 +191,16 @@ func String(a string) (string, error) {
 			return "", err
 		}
 		return string(byt), nil
-	case `home.first`:
+
+	case `home.head`:
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return "", err
 		}
 		path := path.Join(home, value)
 		return FirstLineOf(path)
-	case `home.last`:
+
+	case `home.tail`:
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return "", err
@@ -205,14 +214,16 @@ func String(a string) (string, error) {
 			return "", err
 		}
 		return string(byt), nil
-	case `conf.first`:
+
+	case `conf.head`:
 		conf, err := os.UserConfigDir()
 		if err != nil {
 			return "", err
 		}
 		path := path.Join(conf, value)
 		return FirstLineOf(path)
-	case `conf.last`:
+
+	case `conf.tail`:
 		conf, err := os.UserConfigDir()
 		if err != nil {
 			return "", err
@@ -226,14 +237,16 @@ func String(a string) (string, error) {
 			return "", err
 		}
 		return string(byt), nil
-	case `cache.first`:
+
+	case `cache.head`:
 		cache, err := os.UserCacheDir()
 		if err != nil {
 			return "", err
 		}
 		path := path.Join(cache, value)
 		return FirstLineOf(path)
-	case `cache.last`:
+
+	case `cache.tail`:
 		cache, err := os.UserCacheDir()
 		if err != nil {
 			return "", err
@@ -241,18 +254,40 @@ func String(a string) (string, error) {
 		path := path.Join(cache, value)
 		return LastLineOf(path)
 
-	case `ssh`:
-	case `ssh.first`:
-		//f := RegxSSHURI.FindStringSubmatch(value)
-		//return FirstLineOfSSH(target, path)
-	case `ssh.last`:
+	case `scp`:
+
+	case `ssh.head`:
+
+		// if value begins with // assume a full SSH URL
+		// (ssh.head://localhost/somefile.txt)
+		// (ssh.head://localhost//full/path/to/somefile.txt)
+		if strings.HasPrefix(value, `//`) {
+			//parts := strings.SplitN(value[2:], `/`, 2)
+			//if len(parts) < 2 {
+			//return ``, fmt.Errorf(`missing file/path`)
+			//}
+			//target= `ssh://`+parts[0]+
+			target = `ssh:` + value
+		}
+
+		// otherwise, assume shortform
+		//   (ssh.head:localhost:somefile.txt)
+
+		//return FirstLineOfSSH(target)
+
+	case `ssh.tail`:
 
 	case `http`, `https`:
-	case `http.first`, `https.first`:
-	case `http.last`, `https.last`:
+
+	case `http.head`, `https.head`:
+
+	case `http.tail`, `https.tail`:
 
 	}
-	return it, nil
+
+	// should never get here, but whatever
+	return target, nil
+
 }
 
 // HomeFile returns the []byte content of a file within the
@@ -285,7 +320,8 @@ func ConfFile(relpath string) ([]byte, error) {
 	return os.ReadFile(path.Join(dir, relpath))
 }
 
-// FirstLine returns the first line of the string or []byte.
+// FirstLine returns the first line of the string or []byte (similar to
+// the head -1 command).
 func FirstLine[T string | []byte](a T) string {
 	r := strings.NewReader(string(a))
 	s := bufio.NewScanner(r)
@@ -366,8 +402,80 @@ func RemoteSCP(from, to string) (string, error) {
 // FirstLineOfSSH returns only the first line of a remote file by
 // calling head on the file over an ssh connection. Otherwise, identical
 // to LastLineOfSSH.
-func FirstLineOfSSH(target, path string) (string, error) {
-	return SSHOut(target, `head -1 `+path)
+func FirstLineOfSSH(target string) (string, error) {
+	u := ParseSSHURI(target)
+	if u == nil {
+		return ``, fmt.Errorf(`%q is not a valid SSH URI`, target)
+	}
+	return SSHOut(u.Addr, `head -1 `+u.Path)
+}
+
+// SSHURI is more restrictive than SSH might allow and includes the
+// addition of ssh.head and ssh.tail schemas. Note that the Addr field
+// must be kept in sync with the others if any fields are changed. This
+// is avoid unnecessary indirection just to join the other strings. The
+// UpdateAddr method has been added for convenience to do this.
+type SSHURI struct {
+	Schema string // scp, ssh, ssh.head, ssh.tail
+	User   string // user
+	Host   string // host
+	Port   string // 22
+	Path   string // /some/full/path OR rel/path
+	Addr   string // user@host:22
+}
+
+// UpdateAddr simply sets the Addr string to match the other fields.
+// This is provided to avoid indirection from a dynamic attribute. If
+// the Host is missing sets Addr to blank.
+func (u *SSHURI) UpdateAddr() {
+	if len(u.Host) == 0 {
+		u.Addr = ``
+		return
+	}
+	u.Addr = u.Host
+	if len(u.User) > 0 {
+		u.Addr = u.User + `@` + u.Host
+	}
+	if len(u.Port) > 0 {
+		u.Addr = u.Addr + `:` + u.Port
+	}
+}
+
+// String fulfills the fmt.Stringer interface by printing the canonical
+// URI format.
+func (u SSHURI) String() string {
+	str := fmt.Sprintf(`%v://%v`, u.Schema, u.Addr)
+	if len(u.Path) > 0 {
+		str += `/` + u.Path
+	}
+	return str
+}
+
+// ParseSSHURI return a parsed long or short form SSH URI or nil if
+// unable to parse (no Host found).
+func ParseSSHURI(target string) *SSHURI {
+
+	// long form (URI)
+	if strings.Index(target, `://`) > 0 {
+		p := expr.SSHURI.FindStringSubmatch(target)
+		if len(p) < 4 || len(p[4]) == 0 { // host
+			return nil
+		}
+
+		return &SSHURI{
+			Schema: p[1],
+			Addr:   p[2],
+			User:   p[3],
+			Host:   p[4],
+			Port:   p[5],
+			Path:   p[6],
+		}
+	}
+
+	// short form (not strictly a URI)
+	// TODO
+
+	return nil
 }
 
 // LastLineOfSSH returns the last line of a remote file by calling tail
