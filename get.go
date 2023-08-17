@@ -242,7 +242,7 @@ func String(a string) (string, error) {
 
 	case `ssh`:
 	case `ssh.first`:
-		//TODO
+		//f := RegxSSHURI.FindStringSubmatch(value)
 		//return FirstLineOfSSH(target, path)
 	case `ssh.last`:
 
@@ -333,14 +333,34 @@ func LastLineOf(path string) (string, error) {
 	return prev, nil
 }
 
-// RemoteFileSCPTemp returns an file opened for reading after having
-// copied it with scp to a temporary file and opened it there. No
-// attempt to remove the copied temporary file is done leaving this task
-// to the caller.
+// RemoteSCP copies one or more remote files from the remote target into
+// the directory specified (to) (or a temporary directory if to is blank)
+// using the scp command and returns the path to the directory. The path
+// to the directory is always returned (even when there is an error).
+// The to directory is never removed leaving this to the caller if
+// needed. The target (from) may be any valid scp short form (user@host:
+// rel/path/to/file) or long form URI (scp://user@host:22//full/path/to/file).
+// Note that the scp command is executed with -r added to allow for
+// recursive directory copies. Returns an error if the scp command
+// cannot be found.
+func RemoteSCP(from, to string) (string, error) {
 
-//RemoteFileSCP returns the entire content of the remote file by first
-//copying it with scp into a temporary local file and then buffering the
-//entire file into the []byte slice returned.
+	scpexe, err := exec.LookPath(`scp`)
+	if err != nil {
+		return to, err
+	}
+
+	if len(to) == 0 {
+		to, err = os.MkdirTemp(``, `scp`)
+
+		if err != nil {
+			return to, err
+		}
+	}
+
+	err = exec.Command(scpexe, `-r`, from, to).Run()
+	return to, err
+}
 
 // FirstLineOfSSH returns only the first line of a remote file by
 // calling head on the file over an ssh connection. Otherwise, identical

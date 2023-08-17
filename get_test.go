@@ -403,3 +403,33 @@ func ExampleRegxSSHURI_domain_Only() {
 	//
 	// /some/file
 }
+
+func ExampleRemoteSCP_random_To() {
+	path, err := get.RemoteSCP(`localhost:somefile.txt`, ``)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%q\n", path)
+	/// Output:
+	// /tmp/scp2992279421/
+}
+
+func ExampleRemoteSCP_specific_To() {
+	path, err := get.RemoteSCP(`localhost:somefile.txt`, `/tmp`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%q\n", path)
+	/// Output:
+	// /tmp
+}
+
+func ExampleRemoteSCP_random_To_Many() {
+	path, err := get.RemoteSCP(`localhost:*.txt`, ``)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%q\n", path)
+	/// Output:
+	// /tmp/scp*
+}
