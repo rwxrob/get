@@ -22,6 +22,36 @@ func ExampleString_env() {
 	// something
 }
 
+func ExampleString_env_head() {
+	os.Setenv(`FOO`, "first line\nsecond line\nlast line\n")
+	defer os.Unsetenv(`FOO`)
+
+	it, err := get.String(`env.head:FOO`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// first line
+}
+
+func ExampleString_env_tail() {
+	os.Setenv(`FOO`, "first line\nsecond line\nlast line\n")
+	defer os.Unsetenv(`FOO`)
+
+	it, err := get.String(`env.tail:FOO`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// last line
+}
+
 func ExampleString_env_file() {
 	os.Setenv(`FOOFILE`, `testdata/somefile`)
 	defer os.Unsetenv(`FOOFILE`)
@@ -65,6 +95,222 @@ func ExampleString_env_file_tail() {
 
 	// Output:
 	// last line
+}
+
+func ExampleString_file() {
+
+	it, err := get.String(`file:testdata/somefile`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// something
+}
+
+func ExampleString_file_head() {
+
+	it, err := get.String(`file.head:testdata/datafile`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(it)
+
+	it, err = get.String(`head:testdata/datafile`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(it)
+
+	// Output:
+	// first line
+	// first line
+}
+
+func ExampleString_file_tail() {
+
+	it, err := get.String(`file.tail:testdata/datafile`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(it)
+
+	it, err = get.String(`tail:testdata/datafile`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(it)
+
+	// Output:
+	// last line
+	// last line
+}
+
+func ExampleString_home() {
+
+	it, err := get.String(`home:.some`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// first line
+	// second line
+	// last line
+}
+
+func ExampleString_home_head() {
+
+	it, err := get.String(`home.head:.some`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// first line
+}
+
+func ExampleString_home_tail() {
+
+	it, err := get.String(`home.tail:.some`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// last line
+}
+
+func ExampleString_conf() {
+
+	it, err := get.String(`conf:.some`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// first line
+	// second line
+	// last line
+}
+
+func ExampleString_conf_head() {
+
+	it, err := get.String(`conf.head:.some`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// first line
+}
+
+func ExampleString_conf_tail() {
+
+	it, err := get.String(`conf.tail:.some`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// last line
+}
+
+func ExampleString_cache() {
+
+	it, err := get.String(`cache:.some`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// first line
+	// second line
+	// last line
+}
+
+func ExampleString_cache_head() {
+
+	it, err := get.String(`cache.head:.some`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// first line
+}
+
+func ExampleString_cache_tail() {
+
+	it, err := get.String(`cache.tail:.some`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	// Output:
+	// last line
+}
+
+func ExampleString_scp() {
+
+	it, err := get.String(`scp://localhost/somefile.txt`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(it)
+
+	// Output:
+	// first line
+	// second line
+	// last line
+
+}
+func ExampleString_ssh_head() {
+
+	it, err := get.String(`ssh.head://localhost/somefile.txt`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	/// Output:
+	// first line
+
+}
+
+func ExampleString_ssh_tail() {
+
+	it, err := get.String(`ssh.tail://localhost/somefile.txt`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(it)
+
+	/// Output:
+	// last line
+
 }
 
 func ExampleSchema_values_Only() {
@@ -307,7 +553,7 @@ func ExampleSSHOut_long_Form() {
 
 func ExampleLastLineOfSSH() {
 
-	out, err := get.LastLineOfSSH(`ssh://rwxrob@localhost:22`, `somefile.txt`)
+	out, err := get.LastLineOfSSH(`ssh://rwxrob@localhost:22/somefile.txt`)
 	if err != nil {
 		fmt.Println(err)
 	}

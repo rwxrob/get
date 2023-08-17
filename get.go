@@ -57,7 +57,7 @@ func Schema(a string) (schema, value string) {
 	}
 
 	// looks like we just have a plain string
-	schema = ""
+	schema = ``
 	value = a
 
 	return
@@ -73,30 +73,30 @@ func Schema(a string) (schema, value string) {
 //
 //	(none)         - string as is
 //	env            - value of environment variable by name
-//	env.head      - file line of value of environment variable by name
+//	env.head       - file line of value of environment variable by name
 //	env.tail       - tail line of value of environment variable by name
 //	env.file       - full content file at path from environment variable
-//	env.file.head - head line of file at path from environment variable
+//	env.file.head  - head line of file at path from environment variable
 //	env.file.tail  - tail line of file at path from environment variable
 //	file           - full content of local file at path
-//	file.head     - head line of file
+//	file.head      - head line of file
 //	file.tail      - tail line of file
-//	head          - (same as file.head)
+//	head           - (same as file.head)
 //	tail           - (same as file.tail)
-//	home           - full content of local file relative to os.UserHomeDir (for systems without ~)
-//	home.head     - head line of home
+//	home           - full content of local file relative to os.UserHomeDir
+//	home.head      - head line of home
 //	home.tail      - tail line of home
 //	conf           - full content of local file relative os.UserConfigDir
-//	conf.head     - head line of conf
+//	conf.head      - head line of conf
 //	conf.tail      - tail line of conf
 //	cache          - full content of local file relative os.UserCacheDir
-//	cache.head    - head line of cache
+//	cache.head     - head line of cache
 //	cache.tail     - tail line of cache
 //	scp            - full content of remote file over scp
-//	ssh.head      - head line of remote file with ssh head -1
+//	ssh.head       - head line of remote file with ssh head -1
 //	ssh.tail       - tail line of remote file with ssh tail -1
 //	http(s)        - full content of remote HTTP/TLS GET (net/http.DefaultClient)
-//	http(s).head  - head line of http(s) (from full GET)
+//	http(s).head   - head line of http(s) (from full GET)
 //	http(s).tail   - tail line of https(s) (from full GET)
 //
 // For more information about how the data is acquired and parsed see
@@ -162,7 +162,7 @@ func String(target string) (string, error) {
 	case `env.file`:
 		byt, err := os.ReadFile(os.Getenv(value))
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		return string(byt), nil
 
@@ -175,7 +175,7 @@ func String(target string) (string, error) {
 	case `file`:
 		byt, err := os.ReadFile(value)
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		return string(byt), nil
 
@@ -188,14 +188,14 @@ func String(target string) (string, error) {
 	case `home`:
 		byt, err := HomeFile(value)
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		return string(byt), nil
 
 	case `home.head`:
 		home, err := os.UserHomeDir()
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		path := path.Join(home, value)
 		return FirstLineOf(path)
@@ -203,7 +203,7 @@ func String(target string) (string, error) {
 	case `home.tail`:
 		home, err := os.UserHomeDir()
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		path := path.Join(home, value)
 		return LastLineOf(path)
@@ -211,14 +211,14 @@ func String(target string) (string, error) {
 	case `conf`:
 		byt, err := ConfFile(value)
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		return string(byt), nil
 
 	case `conf.head`:
 		conf, err := os.UserConfigDir()
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		path := path.Join(conf, value)
 		return FirstLineOf(path)
@@ -226,7 +226,7 @@ func String(target string) (string, error) {
 	case `conf.tail`:
 		conf, err := os.UserConfigDir()
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		path := path.Join(conf, value)
 		return LastLineOf(path)
@@ -234,14 +234,14 @@ func String(target string) (string, error) {
 	case `cache`:
 		byt, err := CacheFile(value)
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		return string(byt), nil
 
 	case `cache.head`:
 		cache, err := os.UserCacheDir()
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		path := path.Join(cache, value)
 		return FirstLineOf(path)
@@ -249,33 +249,25 @@ func String(target string) (string, error) {
 	case `cache.tail`:
 		cache, err := os.UserCacheDir()
 		if err != nil {
-			return "", err
+			return ``, err
 		}
 		path := path.Join(cache, value)
 		return LastLineOf(path)
 
 	case `scp`:
+		path, err := RemoteSCP(target, ``)
+		if err != nil {
+			return ``, err
+		}
+		path, _ = FirstFileIn(path)
+		byt, err := os.ReadFile(path)
+		return string(byt), err
 
 	case `ssh.head`:
-
-		// if value begins with // assume a full SSH URL
-		// (ssh.head://localhost/somefile.txt)
-		// (ssh.head://localhost//full/path/to/somefile.txt)
-		if strings.HasPrefix(value, `//`) {
-			//parts := strings.SplitN(value[2:], `/`, 2)
-			//if len(parts) < 2 {
-			//return ``, fmt.Errorf(`missing file/path`)
-			//}
-			//target= `ssh://`+parts[0]+
-			target = `ssh:` + value
-		}
-
-		// otherwise, assume shortform
-		//   (ssh.head:localhost:somefile.txt)
-
-		//return FirstLineOfSSH(target)
+		return FirstLineOfSSH(target)
 
 	case `ssh.tail`:
+		return LastLineOfSSH(target)
 
 	case `http`, `https`:
 
@@ -335,7 +327,7 @@ func FirstLineOf(path string) (string, error) {
 	f, err := os.Open(path)
 	defer f.Close()
 	if err != nil {
-		return "", err
+		return ``, err
 	}
 	s := bufio.NewScanner(f)
 	s.Scan()
@@ -360,7 +352,7 @@ func LastLineOf(path string) (string, error) {
 	f, err := os.Open(path)
 	defer f.Close()
 	if err != nil {
-		return "", err
+		return ``, err
 	}
 	s := bufio.NewScanner(f)
 	var prev string
@@ -401,11 +393,14 @@ func RemoteSCP(from, to string) (string, error) {
 
 // FirstLineOfSSH returns only the first line of a remote file by
 // calling head on the file over an ssh connection. Otherwise, identical
-// to LastLineOfSSH.
+// to LastLineOfSSH. See ParseSSHURI for details.
 func FirstLineOfSSH(target string) (string, error) {
 	u := ParseSSHURI(target)
 	if u == nil {
 		return ``, fmt.Errorf(`%q is not a valid SSH URI`, target)
+	}
+	if len(u.Path) == 0 {
+		return ``, fmt.Errorf(`%q is missing a file path`, target)
 	}
 	return SSHOut(u.Addr, `head -1 `+u.Path)
 }
@@ -497,9 +492,16 @@ func ParseSSHURI(target string) *SSHURI {
 // If the remote system does not support the tail command returns an error
 // stating as much. See SSHOut for valid target formats. The path can be
 // relative to the login home directory or fully qualified (beginning
-// with slash).
-func LastLineOfSSH(target, path string) (string, error) {
-	return SSHOut(target, `tail -1 `+path)
+// with slash). See ParseSSHURI for details.
+func LastLineOfSSH(target string) (string, error) {
+	u := ParseSSHURI(target)
+	if u == nil {
+		return ``, fmt.Errorf(`%q is not a valid SSH URI`, target)
+	}
+	if len(u.Path) == 0 {
+		return ``, fmt.Errorf(`%q is missing a file path`, target)
+	}
+	return SSHOut(u.Addr, `tail -1 `+u.Path)
 }
 
 // SSHOut sends the command string to the target using the ssh command
@@ -515,14 +517,15 @@ func LastLineOfSSH(target, path string) (string, error) {
 func SSHOut(target, command string) (string, error) {
 	sshexe, err := exec.LookPath(`ssh`)
 	if err != nil {
-		return "", err
+		return ``, err
 	}
 	byt, err := exec.Command(sshexe, target, command).Output()
 	return string(byt), err
 }
 
-// FirstFileIn returns the first file in the specified local directory
-// (excluding directories, which are technically also "files").
+// FirstFileIn returns the full path to the first file in the specified
+// local directory (excluding directories, which are technically also
+// "files").
 func FirstFileIn(dir string) (string, error) {
 	files, err := os.ReadDir(dir)
 	if err != nil {
@@ -530,7 +533,7 @@ func FirstFileIn(dir string) (string, error) {
 	}
 	for _, file := range files {
 		if !file.IsDir() {
-			return file.Name(), nil
+			return path.Join(dir, file.Name()), nil
 		}
 	}
 	return ``, fmt.Errorf(`file not found`)
