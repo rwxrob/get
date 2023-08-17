@@ -8,19 +8,19 @@ import (
 
 func ExampleSSHURI() {
 
-	parts := expr.SSHURI.FindStringSubmatch(`ssh://user@host:22/some/file`)
-	if parts == nil {
+	p := expr.SSHURI.FindStringSubmatch(`ssh://user@host:22/some/file`)
+	if p == nil {
 		fmt.Println(`failed to parse`)
 		return
 	}
 
-	fmt.Println(parts[0])
-	fmt.Println(parts[1])
-	fmt.Println(parts[2])
-	fmt.Println(parts[3])
-	fmt.Println(parts[4])
-	fmt.Println(parts[5])
-	fmt.Println(parts[6])
+	fmt.Println(p[0])
+	fmt.Println(p[1])
+	fmt.Println(p[2])
+	fmt.Println(p[3])
+	fmt.Println(p[4])
+	fmt.Println(p[5])
+	fmt.Println(p[6])
 
 	// Output:
 	// ssh://user@host:22/some/file
@@ -34,14 +34,14 @@ func ExampleSSHURI() {
 
 func ExampleSSHURI_nopath() {
 
-	parts := expr.SSHURI.FindStringSubmatch(`ssh://user@host:22`)
-	fmt.Println(parts[0])
-	fmt.Println(parts[1])
-	fmt.Println(parts[2])
-	fmt.Println(parts[3])
-	fmt.Println(parts[4])
-	fmt.Println(parts[5])
-	fmt.Println(parts[6])
+	p := expr.SSHURI.FindStringSubmatch(`ssh://user@host:22`)
+	fmt.Println(p[0])
+	fmt.Println(p[1])
+	fmt.Println(p[2])
+	fmt.Println(p[3])
+	fmt.Println(p[4])
+	fmt.Println(p[5])
+	fmt.Println(p[6])
 
 	// Output:
 	// ssh://user@host:22
@@ -54,14 +54,14 @@ func ExampleSSHURI_nopath() {
 
 func ExampleSSHURI_nouser() {
 
-	parts := expr.SSHURI.FindStringSubmatch(`ssh://host:22/some/file`)
-	fmt.Println(parts[0])
-	fmt.Println(parts[1])
-	fmt.Println(parts[2])
-	fmt.Println(parts[3])
-	fmt.Println(parts[4])
-	fmt.Println(parts[5])
-	fmt.Println(parts[6])
+	p := expr.SSHURI.FindStringSubmatch(`ssh://host:22/some/file`)
+	fmt.Println(p[0])
+	fmt.Println(p[1])
+	fmt.Println(p[2])
+	fmt.Println(p[3])
+	fmt.Println(p[4])
+	fmt.Println(p[5])
+	fmt.Println(p[6])
 
 	// Output:
 	// ssh://host:22/some/file
@@ -75,14 +75,14 @@ func ExampleSSHURI_nouser() {
 
 func ExampleSSHURI_domain_Only() {
 
-	parts := expr.SSHURI.FindStringSubmatch(`ssh://host/some/file`)
-	fmt.Println(parts[0])
-	fmt.Println(parts[1])
-	fmt.Println(parts[2])
-	fmt.Println(parts[3])
-	fmt.Println(parts[4])
-	fmt.Println(parts[5])
-	fmt.Println(parts[6])
+	p := expr.SSHURI.FindStringSubmatch(`ssh://host/some/file`)
+	fmt.Println(p[0])
+	fmt.Println(p[1])
+	fmt.Println(p[2])
+	fmt.Println(p[3])
+	fmt.Println(p[4])
+	fmt.Println(p[5])
+	fmt.Println(p[6])
 
 	// Output:
 	// ssh://host/some/file
@@ -96,14 +96,14 @@ func ExampleSSHURI_domain_Only() {
 
 func ExampleSSHURI_just_Host() {
 
-	parts := expr.SSHURI.FindStringSubmatch(`ssh://host`)
-	fmt.Println(parts[0])
-	fmt.Println(parts[1])
-	fmt.Println(parts[2])
-	fmt.Println(parts[3])
-	fmt.Println(parts[4])
-	fmt.Println(parts[5])
-	fmt.Println(parts[6])
+	p := expr.SSHURI.FindStringSubmatch(`ssh://host`)
+	fmt.Println(p[0])
+	fmt.Println(p[1])
+	fmt.Println(p[2])
+	fmt.Println(p[3])
+	fmt.Println(p[4])
+	fmt.Println(p[5])
+	fmt.Println(p[6])
 
 	// Output:
 	// ssh://host
@@ -117,8 +117,62 @@ func ExampleSSHURI_just_Host() {
 
 func ExampleSSHURI_invalid_No_Host() {
 
-	parts := expr.SSHURI.FindStringSubmatch(`ssh://user@:22`)
-	fmt.Println(parts)
+	p := expr.SSHURI.FindStringSubmatch(`ssh://user@:22`)
+	fmt.Println(p)
+
+	// Output:
+	// []
+}
+
+func ExampleSSHURIShort() {
+
+	p := expr.SSHURIShort.FindStringSubmatch(`user@host:some/file`)
+	fmt.Println(p[0])
+	fmt.Println(p[1])
+	fmt.Println(p[2])
+	fmt.Println(p[3])
+
+	// Output:
+	// user@host:some/file
+	// user
+	// host
+	// some/file
+}
+
+func ExampleSSHURIShort_no_Path() {
+
+	p := expr.SSHURIShort.FindStringSubmatch(`user@host`)
+	fmt.Println(p[0])
+	fmt.Println(p[1])
+	fmt.Println(p[2])
+	fmt.Println(p[3])
+
+	// Output:
+	// user@host
+	// user
+	// host
+	//
+}
+
+func ExampleSSHURIShort_no_User() {
+
+	p := expr.SSHURIShort.FindStringSubmatch(`host`)
+	fmt.Println(p[0])
+	fmt.Println(p[1])
+	fmt.Println(p[2])
+	fmt.Println(p[3])
+
+	// Output:
+	// host
+	//
+	// host
+	//
+}
+
+func ExampleSSHURIShort_invalid_No_Host() {
+
+	p := expr.SSHURIShort.FindStringSubmatch(`user@:some/file`)
+	fmt.Println(p)
 
 	// Output:
 	// []

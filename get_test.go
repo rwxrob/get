@@ -412,8 +412,8 @@ func ExampleParseSSHURI() {
 	uri = get.ParseSSHURI(`ssh.head://user@host:22/some/path`)
 	fmt.Println(uri)
 
-	// no host is invalid
-	uri = get.ParseSSHURI(`ssh.head://user@:22/some/path`)
+	// full path
+	uri = get.ParseSSHURI(`ssh://user@host:22//etc/passwd`)
 	fmt.Println(uri)
 
 	// no path
@@ -428,12 +428,50 @@ func ExampleParseSSHURI() {
 	uri = get.ParseSSHURI(`ssh://host`)
 	fmt.Println(uri)
 
+	// short form, all
+	uri = get.ParseSSHURI(`user@host:some/path`)
+	fmt.Println(uri)
+
+	// short form, full path
+	uri = get.ParseSSHURI(`user@host:/etc/passwd`)
+	fmt.Println(uri)
+
+	// short form, no path
+	uri = get.ParseSSHURI(`user@host`)
+	fmt.Println(uri)
+
+	// short form, no user
+	uri = get.ParseSSHURI(`host`)
+	fmt.Println(uri)
+
+	// invalid
+	uri = get.ParseSSHURI(`bogus://user@:22/some/path`)
+	fmt.Println(uri)
+	uri = get.ParseSSHURI(`ssh.head://user@:22/some/path`)
+	fmt.Println(uri)
+	uri = get.ParseSSHURI(`user@host:`)
+	fmt.Println(uri)
+	uri = get.ParseSSHURI(`user@:/some/path`)
+	fmt.Println(uri)
+	uri = get.ParseSSHURI(`@host`)
+	fmt.Println(uri)
+
 	// Output:
 	// ssh://user@host:22/some/path
 	// some/path
 	// ssh.head://user@host:22/some/path
-	// <nil>
+	// ssh://user@host:22//etc/passwd
 	// ssh://user@host:22
 	// ssh://user@host
 	// ssh://host
+	// ssh://user@host:22/some/path
+	// ssh://user@host:22//etc/passwd
+	// ssh://user@host:22
+	// ssh://host:22
+	// <nil>
+	// <nil>
+	// <nil>
+	// <nil>
+	// <nil>
+
 }

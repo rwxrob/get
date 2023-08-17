@@ -452,7 +452,8 @@ func (u SSHURI) String() string {
 }
 
 // ParseSSHURI return a parsed long or short form SSH URI or nil if
-// unable to parse (no Host found).
+// unable to parse (no Host found). Short form assumes port 22 and ssh
+// for the schema.
 func ParseSSHURI(target string) *SSHURI {
 
 	// long form (URI)
@@ -461,7 +462,6 @@ func ParseSSHURI(target string) *SSHURI {
 		if len(p) < 4 || len(p[4]) == 0 { // host
 			return nil
 		}
-
 		return &SSHURI{
 			Schema: p[1],
 			Addr:   p[2],
@@ -473,9 +473,21 @@ func ParseSSHURI(target string) *SSHURI {
 	}
 
 	// short form (not strictly a URI)
-	// TODO
+	p := expr.SSHURIShort.FindStringSubmatch(target)
+	if len(p) < 3 || len(p[2]) == 0 { // host
+		return nil
+	}
 
-	return nil
+	uri := &SSHURI{
+		Schema: `ssh`,
+		User:   p[1],
+		Host:   p[2],
+		Port:   `22`,
+		Path:   p[3],
+	}
+	uri.UpdateAddr()
+
+	return uri
 }
 
 // LastLineOfSSH returns the last line of a remote file by calling tail

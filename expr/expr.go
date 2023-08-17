@@ -8,4 +8,4 @@ import "regexp"
 
 var SSHURI = regexp.MustCompile(`^(ssh(?:.(?:head|tail))?|scp)://((?:([A-Za-z0-9]+)@)?([A-Za-z0-9.]+)(?::([0-9]{1,7}))?)(?:/(\S+))?$`)
 
-var SSHURIShort = regexp.MustCompile(`(?:([A-Za-z0-9]+)@)?([A-Za-z0-9.]+):(\S+)?`)
+var SSHURIShort = regexp.MustCompile(`^(?:([A-Za-z0-9]+)@)?([A-Za-z0-9.]+)(?::(\S+))?$`)
