@@ -2,7 +2,11 @@ package get_test
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"strings"
 
 	"github.com/rwxrob/get"
 )
@@ -279,7 +283,7 @@ func ExampleString_scp() {
 	}
 	fmt.Println(it)
 
-	// Output:
+	/// Output:
 	// first line
 	// second line
 	// last line
@@ -311,6 +315,83 @@ func ExampleString_ssh_tail() {
 	/// Output:
 	// last line
 
+}
+
+func ExampleString_http() {
+
+	handler := http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "first line\nsecond line\nlast line\n")
+		})
+	svr := httptest.NewServer(handler)
+	defer svr.Close()
+
+	log.Println(svr.URL)
+	it, err := get.String(svr.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(it)
+
+	// Output:
+	// first line
+	// second line
+	// last line
+
+}
+
+func ExampleString_http_head() {
+
+	handler := http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "first line\nsecond line\nlast line\n")
+		})
+	svr := httptest.NewServer(handler)
+	defer svr.Close()
+
+	log.Println(svr.URL)
+	strings.Replace(svr.URL, `http`, `http.head`, 1)
+
+	it, err := get.String(svr.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(it)
+
+	// Output:
+	// first line
+
+}
+
+func ExampleString_http_tail() {
+
+	handler := http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "first line\nsecond line\nlast line\n")
+		})
+	svr := httptest.NewServer(handler)
+	defer svr.Close()
+
+	log.Println(svr.URL)
+	strings.Replace(svr.URL, `http`, `http.tail`, 1)
+
+	it, err := get.String(svr.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(it)
+
+	// Output:
+	// last line
+
+}
+
+func ExampleString_https() {
+	it, err := get.String(`https://rwx.gg`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(it)
 }
 
 func ExampleSchema_values_Only() {
@@ -720,4 +801,25 @@ func ExampleParseSSHURI() {
 	// <nil>
 	// <nil>
 
+}
+
+func ExampleHTTP() {
+
+	handler := http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "first line\nsecond line\nlast line\n")
+		})
+	svr := httptest.NewServer(handler)
+	defer svr.Close()
+
+	byt, err := get.HTTP(svr.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(byt))
+
+	// Output:
+	// first line
+	// second line
+	// last line
 }

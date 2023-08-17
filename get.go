@@ -3,6 +3,8 @@ package get
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path"
@@ -270,6 +272,8 @@ func String(target string) (string, error) {
 		return LastLineOfSSH(target)
 
 	case `http`, `https`:
+		byt, err := HTTP(target)
+		return string(byt), err
 
 	case `http.head`, `https.head`:
 
@@ -537,4 +541,15 @@ func FirstFileIn(dir string) (string, error) {
 		}
 	}
 	return ``, fmt.Errorf(`file not found`)
+}
+
+// HTTP returns the full content of the response to the target (url).
+// TLS is supported. Internally the net/http.DefualtClient is used.
+func HTTP(url string) ([]byte, error) {
+	resp, err := http.DefaultClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return io.ReadAll(resp.Body)
 }
