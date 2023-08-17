@@ -2,6 +2,7 @@ package get
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
@@ -398,4 +399,19 @@ func SSHOut(target, command string) (string, error) {
 	}
 	byt, err := exec.Command(sshexe, target, command).Output()
 	return string(byt), err
+}
+
+// FirstFileIn returns the first file in the specified local directory
+// (excluding directories, which are technically also "files").
+func FirstFileIn(dir string) (string, error) {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return ``, err
+	}
+	for _, file := range files {
+		if !file.IsDir() {
+			return file.Name(), nil
+		}
+	}
+	return ``, fmt.Errorf(`file not found`)
 }

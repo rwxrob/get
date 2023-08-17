@@ -433,3 +433,13 @@ func ExampleRemoteSCP_random_To_Many() {
 	/// Output:
 	// /tmp/scp*
 }
+
+func ExampleFirstFileIn() {
+	file, err := get.FirstFileIn(`testdata`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%q\n", file)
+	/// Output:
+	// "datafile"
+}
