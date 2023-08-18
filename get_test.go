@@ -1,3 +1,6 @@
+// Copyright 2022 Robert S. Muhlestein.
+// SPDX-License-Identifier: Apache-2.0
+
 package get_test
 
 import (
@@ -350,7 +353,7 @@ func ExampleString_http_head() {
 	defer svr.Close()
 
 	log.Println(svr.URL)
-	strings.Replace(svr.URL, `http`, `http.head`, 1)
+	svr.URL = strings.Replace(svr.URL, `http`, `http.head`, 1)
 
 	it, err := get.String(svr.URL)
 	if err != nil {
@@ -373,7 +376,7 @@ func ExampleString_http_tail() {
 	defer svr.Close()
 
 	log.Println(svr.URL)
-	strings.Replace(svr.URL, `http`, `http.tail`, 1)
+	svr.URL = strings.Replace(svr.URL, `http`, `http.tail`, 1)
 
 	it, err := get.String(svr.URL)
 	if err != nil {
@@ -821,5 +824,43 @@ func ExampleHTTP() {
 	// Output:
 	// first line
 	// second line
+	// last line
+}
+
+func ExampleFirstLineOfHTTP() {
+
+	handler := http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "first line\nsecond line\nlast line\n")
+		})
+	svr := httptest.NewServer(handler)
+	defer svr.Close()
+
+	str, err := get.FirstLineOfHTTP(svr.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+
+	// Output:
+	// first line
+}
+
+func ExampleLastLineOfHTTP() {
+
+	handler := http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "first line\nsecond line\nlast line\n")
+		})
+	svr := httptest.NewServer(handler)
+	defer svr.Close()
+
+	str, err := get.LastLineOfHTTP(svr.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+
+	// Output:
 	// last line
 }

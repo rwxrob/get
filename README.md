@@ -3,11 +3,10 @@
 Get data from any common place a person might keep it based on the user's preference.
 
 ```go
-get.String(source string) (string, error)
-get.Bytes(source string) ([]byte, error)
+get.String(target string) (string, error)
 ```
 
-The `source` is in the form of a URL but includes additional schemas to those expected. See Go documentation for more.
+The `target` is in the form of a URL but includes additional schemas to those expected. See Go documentation for more.
 
 ## Installation
 

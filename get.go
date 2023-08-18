@@ -1,3 +1,6 @@
+// Copyright 2022 Robert S. Muhlestein.
+// SPDX-License-Identifier: Apache-2.0
+
 package get
 
 import (
@@ -17,6 +20,7 @@ import (
 // schema combinations will be returned (see source switch for all
 // possible schemas). All others return an empty string for the schema.
 // The second string is always the remaining value (after the colon).
+// See the String function for summary of schemas.
 func Schema(a string) (schema, value string) {
 	parts := strings.SplitN(a, `:`, 2)
 	count := len(parts)
@@ -276,8 +280,12 @@ func String(target string) (string, error) {
 		return string(byt), err
 
 	case `http.head`, `https.head`:
+		target = strings.Replace(target, `.head`, ``, 1)
+		return FirstLineOfHTTP(target)
 
 	case `http.tail`, `https.tail`:
+		target = strings.Replace(target, `.tail`, ``, 1)
+		return LastLineOfHTTP(target)
 
 	}
 
@@ -552,4 +560,24 @@ func HTTP(url string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 	return io.ReadAll(resp.Body)
+}
+
+// FirstLineOfHTTP fetches the entire content at the given URL and
+// returns the first line of it.
+func FirstLineOfHTTP(url string) (string, error) {
+	byt, err := HTTP(url)
+	if err != nil {
+		return ``, err
+	}
+	return FirstLine(byt), nil
+}
+
+// LastLineOfHTTP fetches the entire content at the given URL and
+// returns the last line of it.
+func LastLineOfHTTP(url string) (string, error) {
+	byt, err := HTTP(url)
+	if err != nil {
+		return ``, err
+	}
+	return LastLine(byt), nil
 }
