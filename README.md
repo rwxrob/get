@@ -3,7 +3,6 @@
 [![GoDoc](https://godoc.org/github.com/rwxrob/get?status.svg)](https://godoc.org/github.com/rwxrob/get)
 [![License](https://img.shields.io/badge/license-Apache2-brightgreen.svg)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rwxrob/get)](https://goreportcard.com/report/github.com/rwxrob/get)
-[![Coverage](https://gocover.io/_badge/github.com/rwxrob/get)](https://gocover.io/github.com/rwxrob/get)
 
 
 Get data from any common place a person might keep it based on the user's preference.
